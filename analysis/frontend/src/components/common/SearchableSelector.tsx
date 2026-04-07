@@ -5,9 +5,10 @@ type Props = {
   options: string[]; 
   onChange: (v: string) => void;
   placeholder?: string;
+  className?: string;
 };
 
-export function SearchableSelector({ value, options, onChange, placeholder = "Search..." }: Props) {
+export function SearchableSelector({ value, options, onChange, placeholder = "Search...", className = "" }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -27,7 +28,7 @@ export function SearchableSelector({ value, options, onChange, placeholder = "Se
   }, [wrapperRef]);
 
   return (
-    <div className="relative inline-block w-full min-w-[280px]" ref={wrapperRef}>
+    <div className={`relative inline-block w-full min-w-[280px] ${className}`} ref={wrapperRef}>
       <div 
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full bg-white border border-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-xl shadow-sm hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all cursor-pointer"

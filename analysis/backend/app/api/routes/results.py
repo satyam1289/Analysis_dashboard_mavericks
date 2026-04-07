@@ -57,11 +57,20 @@ def get_results(
         else:
             payload_widgets[widget] = data
 
+    # Calculate meta stats (Filtered by scope)
     q = select(
         func.count(Article.id),
         func.sum(case((Article.is_english.is_(True), 1), else_=0)),
         func.sum(case((Article.is_duplicate.is_(True), 1), else_=0)),
     ).where(Article.upload_id == upload_id)
+
+    if scope_value != "General":
+        if scope == "client":
+            # PostgreSQL contains operator for ARRAYS
+            q = q.where(Article.client_tags.any(scope_value))
+        elif scope == "sector":
+            q = q.where(Article.sector == scope_value)
+
     total, english, duplicate = db.execute(q).one()
     upload = db.execute(select(Upload).where(Upload.id == upload_id)).scalar_one_or_none()
     return {

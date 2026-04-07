@@ -5,21 +5,24 @@ import { SearchableSelector } from "../common/SearchableSelector";
 import { ReachLensbadge } from "../common/ReachLensbadge";
 import { ClientView } from "./ClientView";
 import { SectorView } from "./SectorView";
+import { ComparisonView as CompView } from "./ComparisonView";
+import { ReachLensView } from "./ReachLensView";
 import { ALL_CLIENTS } from "../../constants/clients";
 
 export function DashboardLayout({ uploadId }: { uploadId: string }) {
-  const [scope, setScope] = useState<"sector" | "client">("sector");
+  const [scope, setScope] = useState<"sector" | "client" | "compare" | "reach">("sector");
   const [scopeValue, setScopeValue] = useState("General");
   const [keywordOptions, setKeywordOptions] = useState<string[]>(["General"]);
-  const { data, loading, error } = useResults(uploadId, scope, scopeValue);
+  const { data, loading, error } = useResults(uploadId, scope === "reach" ? "sector" : scope, scope === "reach" ? "General" : scopeValue);
 
   // Fetch the actual keyword values from the uploaded data
   useEffect(() => {
-    if (!uploadId) return;
-    getScopes(uploadId, scope)
+    if (!uploadId || scope === "reach") return;
+    const fetchScope = scope === "compare" ? "client" : scope;
+    getScopes(uploadId, fetchScope as "sector" | "client")
       .then((values) => {
         let allOptions = ["General"];
-        if (scope === "client") {
+        if (scope === "client" || scope === "compare") {
           // Merge detected clients with target list from user
           const merged = Array.from(new Set([...values, ...ALL_CLIENTS])).sort();
           allOptions = ["General", ...merged];
@@ -100,6 +103,28 @@ export function DashboardLayout({ uploadId }: { uploadId: string }) {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
             Client View
           </button>
+          <button
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all duration-300 ${
+              scope === "compare" 
+              ? "bg-white text-blue-600 shadow-md transform scale-105" 
+              : "text-slate-500 hover:text-slate-800"
+            }`}
+            onClick={() => setScope("compare")}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2" /></svg>
+            COMPARE BRANDS 
+          </button>
+          <button
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all duration-300 ${
+              scope === "reach" 
+              ? "bg-white text-blue-600 shadow-md transform scale-105" 
+              : "text-slate-500 hover:text-slate-800"
+            }`}
+            onClick={() => setScope("reach")}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            REACH LENS
+          </button>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-6">
@@ -118,7 +143,15 @@ export function DashboardLayout({ uploadId }: { uploadId: string }) {
       </div>
 
       <div className="bg-slate-50 rounded-3xl min-h-[600px] border border-slate-100/50 pb-12">
-        {scope === "sector" ? <SectorView data={data} /> : <ClientView data={data} />}
+        {scope === "sector" ? (
+          <SectorView data={data} />
+        ) : scope === "client" ? (
+          <ClientView data={data} />
+        ) : scope === "compare" ? (
+          <CompView uploadId={uploadId} mainClient={scopeValue} mainData={data} />
+        ) : (
+          <ReachLensView />
+        )}
       </div>
     </div>
   );

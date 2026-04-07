@@ -18,7 +18,7 @@ export function App() {
               <path d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <span className="text-lg font-bold tracking-tight">Mavericks</span>
+          <span className="text-lg font-bold tracking-tight">MAVERICKS V2</span>
           <span className="mx-2 text-[#e2e8f0]">|</span>
           <span className="text-sm font-medium text-[#94a3b8]">Analysis Dashboard</span>
         </div>

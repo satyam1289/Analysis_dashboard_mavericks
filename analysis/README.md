@@ -1,88 +1,99 @@
-# ⚡ Mavericks Analysis Dashboard
-**High-Fidelity News Intelligence & PR Analytics Platform**
+# 🦅 Mavericks V2: The Global Intelligence Engine
 
-Welcome to the Mavericks Analysis Engine. This platform is designed to transform raw news data extracts (CSV/XLSX) into interactive, multi-layered intelligence dashboards with automated sentiment mapping, brand entity extraction, and journalist performance tracking.
+![Version](https://img.shields.io/badge/version-v2.5.0-blue.svg) ![Status](https://img.shields.io/badge/status-active-green.svg) ![Stack](https://img.shields.io/badge/tech-FastAPI%20%2B%20Celery%20%2B%20React-orange.svg)
 
----
+> **"Transforming raw news data into high-fidelity actionable intelligence."**
 
-## 🏛 System Architecture
-The platform is built on a high-availability microservices architecture designed for rapid data processing and low-latency visualization.
-
-- **Frontend:** React 18 + TypeScript + Vite (Port 5000 via NGINX)
-- **API Engine:** FastAPI + SQLAlchemy 2.0 + Uvicorn (Internal Port 8000)
-- **Data Pipeline:** Celery 5.3 x Redis 7.0 (Asynchronous task orchestration)
-- **Database:** PostgreSQL 16 (Relational news persistence)
-- **Intelligence:** NLP-driven Entity Extraction (spaCy) and Sentiment Analysis (VADER)
+**Mavericks V2** is a sophisticated PR analytics and news intelligence platform. Unlike standard dashboards that simply count mentions, Mavericks uses a **multi-phase asynchronous pipeline** to extract brand entities, analyze sentiment across languages, and calculate influence-based reach scores.
 
 ---
 
-## 🚀 Rapid Deployment (Docker Compose)
+## 🏗️ System Architecture
 
-The entire Mavericks stack is containerized for instant deployment.
+How does Mavericks turn a raw CSV into a premium intelligence dashboard?
 
-### 1. Environment Setup
-Create your local environment file:
-```powershell
+```mermaid
+graph TD
+    User[User Uploads CSV/XLSX] -->|API Request| Gateway[NGINX Gateway]
+    Gateway -->|Port 3000| Backend[FastAPI Server]
+    
+    subgraph "The Orchestration Layer"
+        Backend -->|Write Initial| DB[(PostgreSQL 16)]
+        Backend -->|Enqueue Job| Worker[Celery Orchestrator]
+        Worker <-->|State Management| Cache[(Redis 7.0)]
+    end
+    
+    subgraph "🚀 6-Phase Intelligence Pipeline"
+        Worker -->|Phase 1| Clean[Data Cleaning & Language Filter]
+        Clean -->|Phase 2| NER[Brand Entity Extraction]
+        NER -->|Phase 3| Sentiment[Sentiment Mapping]
+        Sentiment -->|Phase 4| Scoring[ReachLens Evaluator]
+        Scoring -->|Phase 5| Dedup[Fuzzy Deduplication]
+        Dedup -->|Phase 6| Agg[Aggregation & Cache Build]
+    end
+    
+    Agg -->|Update Record| DB
+    DB -->|JSON Payload| Frontend[React v18 Dashboard]
+```
+
+---
+
+## 🔬 The Intelligence Pipeline: 6 Phases of Processing
+
+Every upload triggers a high-performance background process to ensure data accuracy.
+
+| Phase | Module | Purpose | Tech Used |
+| :--- | :--- | :--- | :--- |
+| **01** | **Pre-process** | Row normalization, language detection, and cleaning. | Python / Pandas |
+| **02** | **NER Engine** | Extracts companies, brands, and people mentioned. | spaCy (en_core_web_md) |
+| **03** | **Sentiment** | Calculates tone for every single news article. | NLTK / VADER |
+| **04** | **ReachLens** | Calculates impact scores based on outlet tier. | ReachLens Logic v6 |
+| **05** | **Dedupe** | Groups identical stories across different publishers. | RapidFuzz |
+| **06** | **Aggregation** | Generates pre-computed metrics for instant loading. | SQL Alchemy 2.0 |
+
+---
+
+## 📂 Project Anatomy
+
+-   **`/backend`**: The brain of the operation. Built with FastAPI for high-concurrency performance.
+-   **`/frontend`**: A premium React dashboard featuring Glassmorphism UI and dynamic Recharts.
+-   **`/nginx`**: The central gateway managing routing between the API and UI.
+-   **`/celery`**: Handles the heavy lifting—processing thousands of rows without blocking the UI.
+
+---
+
+## 🚀 Quick Start Guide (Local Deployment)
+
+### 1. Initialize the Environment
+Copy the example environment file and adjust your keys if needed:
+```bash
 cp .env.example .env
 ```
 
-### 2. Launch the Application
-Run the build and start command (this will initialize the database, run migrations, and seed default publisher tiers):
-```powershell
+### 2. Launch the Stack
+Use Docker Compose to build and start all 7 microservices in one command:
+```bash
 docker compose up -d --build
 ```
 
-### 3. Access the Dashboard
-The platform is accessible via the NGINX gateway:
-- **Dashboard:** [http://localhost:5000](http://localhost:5000)
-- **API Documentation:** [http://localhost:5000/api/v1/docs](http://localhost:5000/api/v1/docs)
+### 3. Access the Platform
+- **Dashboard**: [http://localhost:3000](http://localhost:3000)
+- **API Docs**: [http://localhost:3000/api/v1/docs](http://localhost:3000/api/v1/docs)
 
 ---
 
-## 📊 Core Feature Flow
-Follow these "orders" to move from raw data to finished intelligence:
+## 🔧 Maintenance Commands
 
-### Step 1: Data Ingestion
-- Upload your `.xlsx` or `.csv` dataset via the **Data Import** screen.
-- **Requirement:** Your file must contain a `title`, `author` (journalists), and `publisher` column.
-
-### Step 2: Processing Pipeline
-Mavericks automatically executes a 6-phase pipeline for every upload:
-1. **Pre-process:** Language filtering and raw row cleaning.
-2. **Sentiment Analysis:** AI-mapping for Positive/Negative/Neutral signals.
-3. **Entity Extraction:** Automated brand and company tagging.
-4. **Scoring:** ReachLens scoring based on outlet tier and impact.
-5. **Deduplication:** Fuzzy title matching to remove repetitive hits.
-6. **Aggregation:** Final cache building for sub-second dashboard loading.
-
-### Step 3: Interactive Intelligence
-- **Keyword View:** Filter insights by sector or topic.
-- **Client View:** Drill down into specific brand mentions.
-- **Deep-Dive:** Click on any Publisher (e.g., MSN) or Journalist bar to view the associated articles.
-
----
-
-## 🛠 Maintenance & Commands
-
-### Viewing Logs
-To monitor the analysis pipeline in real-time:
-```powershell
+**View Processing Logs:**
+```bash
 docker compose logs -f celery_worker
 ```
 
-### Clearing the Cache
-If you encounter data discrepancies, flush the aggregation cache:
-```powershell
+**Clear Data Cache:**
+```bash
 docker compose exec backend python -m app.scripts.clear_cache
-```
-
-### Hard Reset
-To wipe all data and start with a fresh environment:
-```powershell
-docker compose down -v
-docker compose up -d --build
 ```
 
 ---
 
-**Built with Precision by the Mavericks Intelligence Team.**
+*Built with ❤️ by the Mavericks Intelligence Team | 2026*

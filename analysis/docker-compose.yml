@@ -31,6 +31,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      - ./backend:/app
       - ./uploads:/app/uploads
 
   celery_worker:
@@ -43,6 +44,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      - ./backend:/app
       - ./uploads:/app/uploads
 
   celery_beat:
@@ -52,11 +54,16 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    volumes:
+      - ./backend:/app
 
   frontend:
     build: ./frontend
     ports:
-      - "3000:80"
+      - "3001:80"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
   nginx:
     image: nginx:alpine
@@ -67,6 +74,17 @@ services:
     depends_on:
       - backend
       - frontend
+      - reachlens_engine
+
+  reachlens_engine:
+    build: 
+      context: ../Reach_lens/server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    restart: always
 
 volumes:
   postgres_data:
